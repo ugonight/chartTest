@@ -8,6 +8,7 @@
 
 <script src="Chart.js"></script>
 <script type="text/javascript" src="jquery-3.4.1.min.js"></script>
+<script src="moment.min.js"></script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,6 +21,7 @@
 
 	<button id="shift_left"><</button>
 	<button id="shift_right">></button>
+	<input type="date" id="startDate"></input>
 	<br> 表示期間数 :
 	<input type="number" id="divnum" name="divnum" value="10" min="5"
 		max="100">
@@ -101,9 +103,6 @@
 					dataset.forEach(function(resset) {
 						// データ追加
 						chart.data.labels[i] = resset["label"];
-						// 						chart.data.datasets.forEach(function(dataset) {
-						// 							dataset.data[i] = resset["value"];
-						// 						});
 						chart.data.datasets[j].data[i] = resset["value"];
 						i++;
 					});
@@ -121,13 +120,29 @@
 		updateChart();
 
 		// ボタン操作
+		function syncDate() {
+			var d = document.getElementById("duration").value;
+			document.getElementById("startDate").value = moment().add(
+					-snum * d, 'days').format("YYYY-MM-DD");
+		}
 		$("#shift_left").on("click", function() {
 			snum = snum + 1;
+			syncDate();
 			updateChart();
 		});
 		$("#shift_right").on("click", function() {
 			if (snum > 0) {
 				snum = snum - 1;
+				syncDate();
+				updateChart();
+			}
+		});
+		$("#startDate").on("change", function() {
+			var d = document.getElementById("duration").value;
+			var date = moment(document.getElementById("startDate").value);
+			var diff = moment().diff(date, 'days');
+			if (diff > 0) {
+				snum = Math.floor(diff / d);
 				updateChart();
 			}
 		});
@@ -169,6 +184,7 @@
 			snum = 0;
 			document.getElementById("divnum").value = 10;
 			document.getElementById("duration").value = 7;
+			document.getElementById("startDate").value = moment();
 			chart.data.labels.length = 10;
 			chart.data.datasets[0].data.length = 10;
 			updateChart();
